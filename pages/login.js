@@ -8,77 +8,126 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { StatusBar } from "expo-status-bar";
 
-export default function LoginScreen({ navigation }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+export default function Login({ navigation }) {
+
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
+
+  async function Logar() {
+
+    if (email === "" || pass === "") {
+
       Alert.alert(
-        "Atenção",
-        "Digite seu usuário e sua senha."
+        "Atenção!",
+        "Digite seu e-mail e sua senha."
       );
+
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://10.122.41.156:8000/api/login",
+
+      const response = await axios.post(
+        "http://192.168.56.1:8000/api/login",
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            email: username,
-            senha: password,
-          }),
+          email: email,
+          senha: pass,
         }
       );
 
-      const data = await response.json();
+      console.log("Resposta da API:");
+      console.log(response.data);
 
-      console.log("Status:", response.status);
-      console.log("Resposta da API:", data);
 
-      if (data.erro === "n") {
+      // LOGIN REALIZADO
+      if (response.data.erro === "n") {
+
+        // Salva o token no celular
+        if (response.data.token) {
+
+          await AsyncStorage.setItem(
+            "token",
+            response.data.token
+          );
+
+        }
+
         Alert.alert(
           "Sucesso!",
-          "Login realizado com sucesso!"
+          "Usuário logado com sucesso!",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.replace("Home"),
+            },
+          ]
         );
 
-        console.log("Token:", data.token);
       } else {
+
         Alert.alert(
           "Erro!",
-          data.mensagem || "Usuário ou senha incorretos."
+          response.data.mensagem ||
+          "E-mail ou senha incorretos."
         );
       }
-    } catch (error) {
-      console.log("Erro:", error);
 
-      Alert.alert(
-        "Erro de conexão",
-        "Não foi possível conectar com a API."
-      );
+
+    } catch (error) {
+
+      console.log("ERRO COMPLETO:", error);
+
+      if (error.response) {
+
+        console.log(
+          "Resposta do servidor:",
+          error.response.data
+        );
+
+        Alert.alert(
+          "Erro!",
+          error.response.data.mensagem ||
+          "Não foi possível realizar o login."
+        );
+
+      } else {
+
+        Alert.alert(
+          "Erro de conexão",
+          "Não foi possível conectar com a API."
+        );
+
+      }
+
     } finally {
+
       setLoading(false);
+
     }
-  };
+  }
+
 
   return (
     <View style={styles.container}>
+
       <StatusBar style="light" />
 
       <View style={styles.content}>
 
+        {/* TEXTO DE BOAS-VINDAS */}
+
         <View style={styles.welcome}>
+
           <Text style={styles.title}>
             SEJA BEM-VINDO
           </Text>
@@ -87,7 +136,11 @@ export default function LoginScreen({ navigation }) {
             Acesse sua conta para continuar e aproveitar
             todas as funcionalidades do nosso sistema.
           </Text>
+
         </View>
+
+
+        {/* CARD */}
 
         <View style={styles.card}>
 
@@ -95,75 +148,85 @@ export default function LoginScreen({ navigation }) {
             ACESSE SUA CONTA
           </Text>
 
+
+          {/* EMAIL */}
+
           <TextInput
             style={styles.input}
             placeholder="E-mail"
             placeholderTextColor="#999"
-            value={username}
-            onChangeText={setUsername}
+            value={email}
+            onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
           />
+
+
+          {/* SENHA */}
 
           <TextInput
             style={styles.input}
             placeholder="Senha"
             placeholderTextColor="#999"
-            value={password}
-            onChangeText={setPassword}
+            value={pass}
+            onChangeText={setPass}
             secureTextEntry={true}
           />
 
-          <View style={styles.options}>
 
-            <TouchableOpacity style={styles.remember}>
-              <View style={styles.checkbox} />
-
-              <Text style={styles.smallText}>
-                Lembrar de mim
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity>
-              <Text style={styles.link}>
-                Esqueci minha senha
-              </Text>
-            </TouchableOpacity>
-
-          </View>
+          {/* BOTÃO */}
 
           <TouchableOpacity
             style={styles.button}
-            onPress={handleLogin}
+            onPress={Logar}
             disabled={loading}
           >
+
             {loading ? (
+
               <ActivityIndicator color="#fff" />
+
             ) : (
+
               <Text style={styles.buttonText}>
                 Entrar
               </Text>
+
             )}
+
           </TouchableOpacity>
+
+
+          {/* CADASTRO */}
 
           <Text style={styles.register}>
             Ainda não possui uma conta?{" "}
-            <Text style={styles.link}>
+
+            <Text
+              style={styles.link}
+              onPress={() => navigation.navigate("Cadastro")}
+            >
               Cadastre-se
             </Text>
+
           </Text>
 
         </View>
+
       </View>
+
     </View>
   );
 }
 
+
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     backgroundColor: "#087BC9",
   },
+
 
   content: {
     flex: 1,
@@ -171,11 +234,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
+
   welcome: {
     width: "80%",
     alignSelf: "center",
     marginBottom: 25,
   },
+
 
   title: {
     color: "#fff",
@@ -184,6 +249,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
+
   description: {
     color: "#fff",
     fontSize: 12,
@@ -191,22 +257,29 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
+
   card: {
     width: "70%",
     alignSelf: "center",
     backgroundColor: "#fff",
+
     borderRadius: 10,
+
     paddingHorizontal: 18,
     paddingVertical: 18,
+
     elevation: 6,
+
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 3,
     },
+
     shadowOpacity: 0.18,
     shadowRadius: 6,
   },
+
 
   loginTitle: {
     fontSize: 16,
@@ -215,58 +288,38 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
+
   input: {
     width: "100%",
     height: 40,
+
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 5,
+
     paddingHorizontal: 10,
+
     fontSize: 11,
     color: "#333",
-    marginBottom: 9,
+
+    marginBottom: 10,
   },
 
-  options: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 14,
-  },
-
-  remember: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  checkbox: {
-    width: 12,
-    height: 12,
-    borderWidth: 1,
-    borderColor: "#bbb",
-    borderRadius: 2,
-    marginRight: 5,
-  },
-
-  smallText: {
-    color: "#777",
-    fontSize: 8,
-  },
-
-  link: {
-    color: "#087BC9",
-    fontSize: 8,
-    fontWeight: "bold",
-  },
 
   button: {
     width: "100%",
     height: 40,
+
     backgroundColor: "#087BC9",
+
     borderRadius: 5,
+
     alignItems: "center",
     justifyContent: "center",
+
+    marginTop: 5,
   },
+
 
   buttonText: {
     color: "#fff",
@@ -274,10 +327,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
+
   register: {
     textAlign: "center",
-    marginTop: 13,
+
+    marginTop: 15,
+
     fontSize: 8,
     color: "#888",
   },
+
+
+  link: {
+    color: "#087BC9",
+    fontSize: 8,
+    fontWeight: "bold",
+  },
+
 });
