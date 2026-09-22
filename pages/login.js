@@ -16,7 +16,6 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    // Verifica se os campos estão preenchidos
     if (!username.trim() || !password.trim()) {
       Alert.alert(
         "Atenção",
@@ -28,17 +27,14 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
 
     try {
-      // Conecta com a API Laravel
       const response = await fetch(
-        "http://10.122.35.182:8000/api/login",
+        "http://10.122.41.156:8000/api/login",
         {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-
           body: JSON.stringify({
             email: username,
             senha: password,
@@ -48,9 +44,9 @@ export default function LoginScreen({ navigation }) {
 
       const data = await response.json();
 
+      console.log("Status:", response.status);
       console.log("Resposta da API:", data);
 
-      // LOGIN CORRETO
       if (data.erro === "n") {
         Alert.alert(
           "Sucesso!",
@@ -58,28 +54,19 @@ export default function LoginScreen({ navigation }) {
         );
 
         console.log("Token:", data.token);
-
-        // Quando criar a tela Home, pode usar:
-        // navigation.replace("Home");
-      }
-
-      // LOGIN INCORRETO
-      else {
+      } else {
         Alert.alert(
           "Erro!",
           data.mensagem || "Usuário ou senha incorretos."
         );
       }
-
     } catch (error) {
-      console.log("Erro na API:", error);
+      console.log("Erro:", error);
 
-      // ERRO DE CONEXÃO
       Alert.alert(
         "Erro de conexão",
         "Não foi possível conectar com a API."
       );
-
     } finally {
       setLoading(false);
     }
@@ -91,7 +78,6 @@ export default function LoginScreen({ navigation }) {
 
       <View style={styles.content}>
 
-        {/* TEXTO DE BOAS-VINDAS */}
         <View style={styles.welcome}>
           <Text style={styles.title}>
             SEJA BEM-VINDO
@@ -103,14 +89,12 @@ export default function LoginScreen({ navigation }) {
           </Text>
         </View>
 
-        {/* CARD DE LOGIN */}
         <View style={styles.card}>
 
           <Text style={styles.loginTitle}>
             ACESSE SUA CONTA
           </Text>
 
-          {/* E-MAIL */}
           <TextInput
             style={styles.input}
             placeholder="E-mail"
@@ -121,7 +105,6 @@ export default function LoginScreen({ navigation }) {
             keyboardType="email-address"
           />
 
-          {/* SENHA */}
           <TextInput
             style={styles.input}
             placeholder="Senha"
@@ -131,7 +114,6 @@ export default function LoginScreen({ navigation }) {
             secureTextEntry={true}
           />
 
-          {/* OPÇÕES */}
           <View style={styles.options}>
 
             <TouchableOpacity style={styles.remember}>
@@ -150,7 +132,6 @@ export default function LoginScreen({ navigation }) {
 
           </View>
 
-          {/* BOTÃO ENTRAR */}
           <TouchableOpacity
             style={styles.button}
             onPress={handleLogin}
@@ -165,7 +146,6 @@ export default function LoginScreen({ navigation }) {
             )}
           </TouchableOpacity>
 
-          {/* CADASTRO */}
           <Text style={styles.register}>
             Ainda não possui uma conta?{" "}
             <Text style={styles.link}>
@@ -218,9 +198,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 18,
     paddingVertical: 18,
-
     elevation: 6,
-
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
