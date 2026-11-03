@@ -59,7 +59,7 @@ return `${year}-${month}-${day}`;
     try {
 
       const response = await axios.post(
-        "http://192.168.56.1:8000/api/cadastra_usuario",
+        "http://10.122.41.156:8000/api/cadastra_usuario",
         {
           nome: nome,
           email: email,

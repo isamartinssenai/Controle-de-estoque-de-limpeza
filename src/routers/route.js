@@ -8,9 +8,7 @@ export default function Router() {
             <Stack.Screen name="Splash" component={Splash} />
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Home" component={Home} />
-            <Stack.Screen name="Cadastro_user" component={Cadastro_user} />
-            <Stack.Screen name="Edita_tarefa" component={Edita_tarefa} />
-            <Stack.Screen name="Tarefas" component={Tarefas} />
+            <Stack.Screen name="cadastro_usuario" component={cadastro_usuario} />
         </Stack.Navigator>
     )
 }

@@ -38,7 +38,7 @@ export default function Login({ navigation }) {
     try {
 
       const response = await axios.post(
-        "http://192.168.56.1:8000/api/login",
+        "http://10.122.41.156:8000/api/login",
         {
           email: email,
           senha: pass,
